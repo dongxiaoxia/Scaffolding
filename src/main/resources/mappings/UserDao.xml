@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.dongxiaoxia.modules.dao.UserDao">
+
+    <sql id="userColumns">
+        a.id,
+        a.name,
+        u1.id AS "createBy.id",
+        u1.name AS "createBy.name",
+        a.createDate,
+        u2.id AS "updateBy.id",
+        u2.name AS "updateBy.name",
+        a.updateDate,
+        a.delFlag
+    </sql>
+
+    <sql id="userJoins">
+        LEFT JOIN tbl_user u1 ON a.createBy = u1.id
+        LEFT JOIN tbl_user u2 ON a.updateBy = u2.id
+    </sql>
+
+    <!-- 根据编号获得用户 -->
+    <select id="get" resultType="User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM tbl_user a
+        <include refid="userJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- 分页查询用户信息 -->
+    <select id="findList" resultType="User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM tbl_user a
+        <include refid="userJoins"/>
+        WHERE a.delFlag = #{DEL_FLAG_NORMAL}
+        <if test="name != null and name != ''">
+            AND a.name= #{name}
+        </if>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+        </choose>
+    </select>
+
+    <!-- 查询全部用户 -->
+    <select id="findAllList" resultType="User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM tbl_user a
+        <include refid="userJoins"/>
+        WHERE a.delFlag = #{DEL_FLAG_NORMAL}
+    </select>
+
+    <!-- 查询全部用户数目 -->
+    <select id="findAllCount" resultType="long">
+        SELECT COUNT(1) FROM tbl_user a
+    </select>
+
+    <!-- 插入用户 -->
+    <insert id="insert">
+        INSERT INTO tbl_user (
+        id,
+        name,
+        <if test="createBy != null">createBy,createDate,</if>
+        <if test="updateBy != null">updateBy,updateDate,</if>
+        delFlag
+        ) VALUES (
+        #{id},
+        #{name},
+        <if test="createBy != null">#{createBy.id},#{createDate},</if>
+        <if test="updateBy != null">#{updateBy.id},#{updateDate},</if>
+        #{delFlag}
+        )
+    </insert>
+
+    <!-- 更新用户 -->
+    <update id="update">
+        UPDATE tbl_user SET
+        <if test="name != null and name != ''">name=#{name},</if>
+        <if test="updateBy != null">updateBy=#{updateBy.id},</if>
+        updateDate=#{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 逻辑删除用户 -->
+    <update id="delete">
+        UPDATE tbl_user SET delFlag = #{DEL_FLAG_DELETE} WHERE id = #{id}
+    </update>
+
+    <select id="getByUserName" parameterType="User" resultType="User">
+        SELECT
+        <include refid="userColumns"/>
+        FROM tbl_user a
+        <include refid="userJoins"/>
+        WHERE a.name=#{name}
+    </select>
+</mapper>

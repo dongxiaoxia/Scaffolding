@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.dongxiaoxia.modules.dao.ExampleDao">
+
+    <insert id="insert">
+        INSERT INTO tbl_example (
+        id,
+        value,
+        <if test="createBy != null">createBy,createDate,</if>
+        <if test="updateBy != null">updateBy,updateDate,</if>
+        delFlag
+        ) VALUES (
+        #{id},
+        #{value},
+        <if test="createBy != null">#{createBy.id},#{createDate},</if>
+        <if test="updateBy != null">#{updateBy.id},#{updateDate},</if>
+        #{delFlag}
+        )
+    </insert>
+</mapper>
